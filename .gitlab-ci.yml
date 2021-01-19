@@ -1,0 +1,55 @@
+image: node:lts-alpine
+
+.tags: &tags [ekino, france]
+
+stages:
+  - dependencies
+  - quality
+  - test
+  - compile
+
+load-dependencies:
+  stage: dependencies
+  tags: *tags
+  artifacts:
+    name: node-dependencies
+    paths:
+      - node_modules
+    untracked: true
+    expire_in: 7 days
+  script:
+    - yarn install
+  needs: []
+
+lint:
+  stage: quality
+  tags: *tags
+  script:
+    - yarn lint
+  needs: [load-dependencies]
+
+test-unit:
+  stage: test
+  tags: *tags
+  script:
+    - yarn test:unit:coverage
+  needs: [load-dependencies]
+
+test-integration:
+  stage: test
+  tags: *tags
+  script:
+    - yarn test:integration:coverage
+  needs: [load-dependencies]
+
+compile:
+  stage: compile
+  tags: *tags
+  script:
+    - yarn compile
+  artifacts:
+    name: compiled-lib
+    paths:
+      - build
+    expire_in: 7 days
+  needs: [test-unit, test-integration]
