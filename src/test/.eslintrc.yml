@@ -1,0 +1,7 @@
+extends:
+  - 'plugin:ava/recommended'
+rules:
+  'ava/use-test': 'warn'
+  'ava/no-ignored-test-files':
+    - 'error'
+    - files: ["src/test/unit/**/*.ts", "src/test/integration/**/*.ts"]
