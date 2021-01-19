@@ -8,6 +8,13 @@ stages:
   - test
   - compile
 
+audit-dependencies:
+  stage: dependencies
+  script:
+    - yarn npm audit
+  allow_failure: true
+  needs: []
+
 load-dependencies:
   stage: dependencies
   tags: *tags
@@ -28,18 +35,18 @@ lint:
     - yarn lint
   needs: [load-dependencies]
 
-test-unit:
+unit-test:
   stage: test
   tags: *tags
   script:
     - yarn test:unit:coverage
   needs: [load-dependencies]
 
-test-integration:
+integration-test:
   stage: test
   tags: *tags
   script:
-    - yarn test:integration:coverage
+    - yarn test:int:coverage
   needs: [load-dependencies]
 
 compile:
@@ -52,4 +59,4 @@ compile:
     paths:
       - build
     expire_in: 7 days
-  needs: [test-unit, test-integration]
+  needs: [load-dependencies]
