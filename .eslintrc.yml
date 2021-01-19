@@ -1,0 +1,20 @@
+root: true
+parser: '@typescript-eslint/parser'
+parserOptions:
+  project: './tsconfig.json'
+  sourceType: module
+  ecmaVersion: 2020
+ignorePatterns:
+  - '*.config.js'
+env:
+  node: true
+plugins:
+  - 'simple-import-sort'
+extends:
+  - 'eslint:recommended'
+  - 'plugin:@typescript-eslint/eslint-recommended'
+  - 'plugin:@typescript-eslint/recommended'
+  - 'prettier/@typescript-eslint'
+  - 'plugin:prettier/recommended'
+rules:
+  'simple-import-sort/imports': 'error'

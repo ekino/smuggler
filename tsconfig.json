@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "incremental": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "allowJs": false,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "outDir": "./build",
+    "sourceMap": true,
+  },
+  "include": [
+    "src/lib/**/*",
+    "src/test/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

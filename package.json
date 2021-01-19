@@ -1,0 +1,41 @@
+{
+  "name": "nock-on-demand",
+  "version": "1.0.0",
+  "description": "An easy way to manage Nock mocks on a running Node application.",
+  "main": "index.js",
+  "repository": "git@gitlab.ekino.com:fabien.thouraud/nock-on-demand.git",
+  "author": "Fabien Thouraud <fabien.thouraud@ekino.com>",
+  "license": "MIT",
+  "dependencies": {
+    "nock": ">= 11 <= 13"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^11.0.0",
+    "@commitlint/config-conventional": "^11.0.0",
+    "@types/node": "^14.14.20",
+    "@types/sinon": "^9.0.10",
+    "@typescript-eslint/eslint-plugin": "^4.13.0",
+    "@typescript-eslint/parser": "^4.13.0",
+    "ava": "^3.15.0",
+    "eslint": "^7.17.0",
+    "eslint-config-prettier": "^7.1.0",
+    "eslint-plugin-ava": "^11.0.0",
+    "eslint-plugin-prettier": "^3.3.1",
+    "eslint-plugin-simple-import-sort": "^7.0.0",
+    "husky": "^4.3.7",
+    "nyc": "^15.1.0",
+    "prettier": "^2.2.1",
+    "sinon": "^9.2.3",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.1.3"
+  },
+  "scripts": {
+    "compile": "tsc --project tsconfig.lib.json",
+    "lint": "eslint --ignore-path .gitignore 'src/**/*.ts' --quiet",
+    "lint:fix": "eslint --ignore-path .gitignore 'src/**/*.ts' --quiet --fix",
+    "test:unit": "ava src/test/unit/**/*.ts",
+    "test:unit:coverage": "nyc --require ts-node/register yarn test:unit",
+    "test:int": "ava src/test/integration/**/*.ts",
+    "test:int:coverage": "nyc --require ts-node/register yarn test:int"
+  }
+}
