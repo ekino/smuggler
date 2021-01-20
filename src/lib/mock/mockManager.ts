@@ -1,21 +1,20 @@
+import nock from 'nock'
+
 import { TechnicalError } from '../error'
 import { ErrorCode } from '../error/definitions'
 import { MockDefinition } from './loader'
 import { MockDefinitionRepository } from './mockDefinitionRepository'
-import { ScopeRepository } from './scopeRepository'
 
 export class MockManager {
     private readonly mockDefinitionRepository: MockDefinitionRepository
-    private readonly scopeRepository: ScopeRepository
 
-    constructor(mockDefinitionRepository: MockDefinitionRepository, scopeRepository: ScopeRepository) {
+    constructor(mockDefinitionRepository: MockDefinitionRepository) {
         this.mockDefinitionRepository = mockDefinitionRepository
-        this.scopeRepository = scopeRepository
     }
 
     private addMockToRepository = (definition?: MockDefinition): void => {
         if (definition?.kind === 'js') {
-            this.scopeRepository.add(definition.declareMock())
+            definition.declareMock()
         }
     }
 
@@ -28,20 +27,24 @@ export class MockManager {
     }
 
     listActiveMocks(): string[] {
-        return this.scopeRepository.getActiveMocks()
+        return nock.activeMocks()
     }
 
     listPendingMocks(): string[] {
-        return this.scopeRepository.getPendingMocks()
+        return nock.pendingMocks()
     }
 
     checkNoPendingMocks(): void {
-        const pendingMocks = this.scopeRepository.getPendingMocks()
+        const pendingMocks = nock.pendingMocks()
         if (pendingMocks.length > 0) {
             throw new TechnicalError(
                 ErrorCode.MocksStillPending,
                 `At least a mock is still pending: \n${pendingMocks.map((it) => ` - ${it}`).join('\n')}`
             )
         }
+    }
+
+    resetMocks(): void {
+        nock.cleanAll()
     }
 }

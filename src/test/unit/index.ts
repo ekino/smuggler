@@ -71,6 +71,4 @@ test('initialize should return a MockManager', async (t) => {
 
     t.truthy(mockManager['mockDefinitionRepository'])
     t.deepEqual(mockManager['mockDefinitionRepository']['mockDefinitions'], [definitionOne, definitionTwo])
-
-    t.truthy(mockManager['scopeRepository'])
 })

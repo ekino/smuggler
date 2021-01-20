@@ -1,4 +1,4 @@
-import { listAvailableMocks, MockDefinitionRepository, MockManager, ScopeRepository } from './mock'
+import { listAvailableMocks, MockDefinitionRepository, MockManager } from './mock'
 import { getMockDefinitionLoaders, MockDefinition } from './mock/loader'
 import { getOptions, Options, UserDefinedOptions } from './option'
 import { isDefined } from './utils/type'
@@ -22,5 +22,5 @@ export const initialize = async (userOptions?: UserDefinedOptions): Promise<Mock
 
     const mockDefinitions = await loadMockDefinitions(options)
 
-    return new MockManager(new MockDefinitionRepository(mockDefinitions), new ScopeRepository())
+    return new MockManager(new MockDefinitionRepository(mockDefinitions))
 }

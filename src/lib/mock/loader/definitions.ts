@@ -1,5 +1,3 @@
-import { Scope } from 'nock'
-
 export interface MockDefinitionLoader {
     name: string
     accept: (absoluteFilePath: string) => boolean
@@ -15,5 +13,5 @@ export type BaseMockDefinition<TKind extends string> = {
 }
 
 export type JavaScriptMockDefinition = BaseMockDefinition<'js'> & {
-    declareMock: () => Scope
+    declareMock: () => void
 }

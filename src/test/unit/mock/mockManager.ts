@@ -1,14 +1,17 @@
 import avaTest, { TestInterface } from 'ava'
-import { createStubInstance, mock, SinonStubbedInstance } from 'sinon'
+import nock from 'nock'
+import { createStubInstance, mock, SinonStub, SinonStubbedInstance, stub } from 'sinon'
 
 import { TechnicalError } from '../../../lib/error'
 import { ErrorCode } from '../../../lib/error/definitions'
-import { MockDefinitionRepository, MockManager, ScopeRepository } from '../../../lib/mock'
+import { MockDefinitionRepository, MockManager } from '../../../lib/mock'
 import { JavaScriptMockDefinition, MockDefinition } from '../../../lib/mock/loader'
 import { getFakeScope, getMockDefinition } from '../../_utils/data'
 
 type TestContext = {
-    scopeRepositoryStub: SinonStubbedInstance<ScopeRepository>
+    activeMocksStub: SinonStub
+    pendingMocksStub: SinonStub
+    cleanAllStub: SinonStub
     mockDefinitionRepositoryStub: SinonStubbedInstance<MockDefinitionRepository>
     mockManager: MockManager
 }
@@ -17,21 +20,27 @@ const test = avaTest as TestInterface<TestContext>
 
 test.before((t) => {
     t.context.mockDefinitionRepositoryStub = createStubInstance<MockDefinitionRepository>(MockDefinitionRepository)
-    t.context.scopeRepositoryStub = createStubInstance<ScopeRepository>(ScopeRepository)
+    t.context.activeMocksStub = stub(nock, 'activeMocks')
+    t.context.pendingMocksStub = stub(nock, 'pendingMocks')
+    t.context.cleanAllStub = stub(nock, 'cleanAll')
 
     t.context.mockManager = new MockManager(
-        (t.context.mockDefinitionRepositoryStub as unknown) as MockDefinitionRepository,
-        (t.context.scopeRepositoryStub as unknown) as ScopeRepository
+        (t.context.mockDefinitionRepositoryStub as unknown) as MockDefinitionRepository
     )
 })
 
 test.beforeEach((t) => {
     t.context.mockDefinitionRepositoryStub.getById.reset()
     t.context.mockDefinitionRepositoryStub.getByGroupId.reset()
-    t.context.scopeRepositoryStub.add.reset()
-    t.context.scopeRepositoryStub.clear.reset()
-    t.context.scopeRepositoryStub.getPendingMocks.reset()
-    t.context.scopeRepositoryStub.getActiveMocks.reset()
+    t.context.activeMocksStub.reset()
+    t.context.pendingMocksStub.reset()
+    t.context.cleanAllStub.reset()
+})
+
+test.after((t) => {
+    t.context.activeMocksStub.restore()
+    t.context.pendingMocksStub.restore()
+    t.context.cleanAllStub.restore()
 })
 
 test('mockManager.activateMock should find a definition, create the scope then add it', (t) => {
@@ -49,13 +58,9 @@ test('mockManager.activateMock should find a definition, create the scope then a
 
     t.context.mockDefinitionRepositoryStub.getById.returns(mockDefinition)
 
-    t.context.scopeRepositoryStub.add.returns()
-
     t.context.mockManager.activateMock(mockId)
 
     t.true(t.context.mockDefinitionRepositoryStub.getById.calledOnceWithExactly(mockId))
-
-    t.true(t.context.scopeRepositoryStub.add.calledOnceWithExactly(scope))
 })
 
 test.serial('mockManager.activateMock should not add an unknown definition kind', (t) => {
@@ -76,8 +81,6 @@ test.serial('mockManager.activateMock should not add an unknown definition kind'
     t.context.mockManager.activateMock(mockId)
 
     t.true(t.context.mockDefinitionRepositoryStub.getById.calledOnceWithExactly(mockId))
-
-    t.false(t.context.scopeRepositoryStub.add.called)
 })
 
 test('mockManager.activateMocksGroup should find a definition, create the scope then add it', (t) => {
@@ -100,14 +103,9 @@ test('mockManager.activateMocksGroup should find a definition, create the scope 
 
     t.context.mockDefinitionRepositoryStub.getByGroupId.returns([mockDefinitionA, mockDefinitionB])
 
-    t.context.scopeRepositoryStub.add.returns()
-
     t.context.mockManager.activateMocksGroup(mockGroupId)
 
     t.true(t.context.mockDefinitionRepositoryStub.getByGroupId.calledOnceWithExactly(mockGroupId))
-
-    t.true(t.context.scopeRepositoryStub.add.calledWithExactly(scopeA))
-    t.true(t.context.scopeRepositoryStub.add.calledWithExactly(scopeB))
 })
 
 test.serial('mockManager.activateMocksGroup should not add an unknown definition kind', (t) => {
@@ -132,19 +130,15 @@ test.serial('mockManager.activateMocksGroup should not add an unknown definition
 
     t.context.mockDefinitionRepositoryStub.getByGroupId.returns([mockDefinitionA, mockDefinitionB])
 
-    t.context.scopeRepositoryStub.add.returns()
-
     t.context.mockManager.activateMocksGroup(mockGroupId)
 
     t.true(t.context.mockDefinitionRepositoryStub.getByGroupId.calledOnceWithExactly(mockGroupId))
-
-    t.true(t.context.scopeRepositoryStub.add.calledOnceWithExactly(scopeA))
 })
 
 test('mockManager.listActiveMocks should return active mocks', (t) => {
     const expectedActiveMocks = ['mock-a', 'mock-b']
 
-    t.context.scopeRepositoryStub.getActiveMocks.returns(expectedActiveMocks)
+    t.context.activeMocksStub.returns(expectedActiveMocks)
 
     const activeMocks = t.context.mockManager.listActiveMocks()
 
@@ -154,7 +148,7 @@ test('mockManager.listActiveMocks should return active mocks', (t) => {
 test('mockManager.listPendingMocks should return pending mocks', (t) => {
     const expectedPendingMocks = ['mock-a', 'mock-b']
 
-    t.context.scopeRepositoryStub.getPendingMocks.returns(expectedPendingMocks)
+    t.context.pendingMocksStub.returns(expectedPendingMocks)
 
     const pendingMocks = t.context.mockManager.listPendingMocks()
 
@@ -164,7 +158,7 @@ test('mockManager.listPendingMocks should return pending mocks', (t) => {
 test('mockManager.checkNoPendingMocks should throw when mocks are pending', (t) => {
     const expectedPendingMocks = ['mock-a', 'mock-b']
 
-    t.context.scopeRepositoryStub.getPendingMocks.returns(expectedPendingMocks)
+    t.context.pendingMocksStub.returns(expectedPendingMocks)
 
     const expectedMessage = `At least a mock is still pending: \n - mock-a\n - mock-b`
 
@@ -178,7 +172,13 @@ test('mockManager.checkNoPendingMocks should throw when mocks are pending', (t) 
 test('mockManager.checkNoPendingMocks should not throw when there is no pending mock', (t) => {
     const expectedPendingMocks: string[] = []
 
-    t.context.scopeRepositoryStub.getPendingMocks.returns(expectedPendingMocks)
+    t.context.pendingMocksStub.returns(expectedPendingMocks)
 
     t.notThrows(() => t.context.mockManager.checkNoPendingMocks())
+})
+
+test('mockManager.resetMocks should clean all pending mocks', (t) => {
+    t.context.mockManager.resetMocks()
+
+    t.true(t.context.cleanAllStub.calledOnce)
 })
