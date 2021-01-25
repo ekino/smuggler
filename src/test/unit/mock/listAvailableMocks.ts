@@ -5,6 +5,7 @@ import { SinonStub, stub } from 'sinon'
 
 import { hasAllowedExtension, listAvailableMocks } from '../../../lib/mock/listAvailableMocks'
 import { Options } from '../../../lib/option'
+import { getOptions } from '../../_utils/data'
 
 type TestContext = {
     joinStub: SinonStub
@@ -33,11 +34,11 @@ test.after((t) => {
 })
 
 const givenAllowedExtension = ['json', 'js', 'ts']
-const givenOptions: Options = {
+const givenOptions: Options = getOptions({
     baseDirectory: './foo',
     mocksDirectory: '__mocks__',
     allowedExtensions: givenAllowedExtension,
-}
+})
 
 const expectedRootDirectory = './foo/__mocks__'
 

@@ -5,7 +5,7 @@ import { initialize } from '../../lib'
 import * as mockUtils from '../../lib/mock/listAvailableMocks'
 import * as mockLoader from '../../lib/mock/loader'
 import { UserDefinedOptions } from '../../lib/option'
-import { getMockDefinition } from '../_utils/data'
+import { getMockDefinition, getOptions } from '../_utils/data'
 
 type TestContext = {
     mockDefinitionLoaderStub: mockLoader.MockDefinitionLoader
@@ -63,12 +63,16 @@ test.after((t) => {
 })
 
 test('initialize should return a MockManager', async (t) => {
-    const userDefinedOptions: UserDefinedOptions = {
+    const userDefinedOptions: UserDefinedOptions = getOptions({
         allowedExtensions: ['js'],
-    }
+    })
 
     const mockManager = await initialize(userDefinedOptions)
 
     t.truthy(mockManager['mockDefinitionRepository'])
     t.deepEqual(mockManager['mockDefinitionRepository']['mockDefinitions'], [definitionOne, definitionTwo])
+
+    const scopesByName = mockManager['scopeRepository']['scopesByName']
+    t.truthy(scopesByName)
+    t.true(scopesByName.has('foo'))
 })

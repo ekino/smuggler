@@ -4,26 +4,32 @@ import { TechnicalError } from '../error'
 import { ErrorCode } from '../error/definitions'
 import { MockDefinition } from './loader'
 import { MockDefinitionRepository } from './mockDefinitionRepository'
+import { ScopeRepository } from './scopeRepository'
 
 export class MockManager {
     private readonly mockDefinitionRepository: MockDefinitionRepository
+    private readonly scopeRepository: ScopeRepository
 
-    constructor(mockDefinitionRepository: MockDefinitionRepository) {
+    constructor(mockDefinitionRepository: MockDefinitionRepository, scopeRepository: ScopeRepository) {
         this.mockDefinitionRepository = mockDefinitionRepository
+        this.scopeRepository = scopeRepository
     }
 
-    private addMockToRepository = (definition?: MockDefinition): void => {
-        if (definition?.kind === 'js') {
-            definition.declareMock()
+    private declareMock = (definition?: MockDefinition): void => {
+        if (definition) {
+            const scope = this.scopeRepository.getByName(definition?.serviceName)
+            if (definition.kind === 'js') {
+                definition.declareMock(scope)
+            }
         }
     }
 
     activateMock(id: string): void {
-        this.addMockToRepository(this.mockDefinitionRepository.getById(id))
+        this.declareMock(this.mockDefinitionRepository.getById(id))
     }
 
     activateMocksGroup(groupId: string): void {
-        this.mockDefinitionRepository.getByGroupId(groupId).forEach(this.addMockToRepository)
+        this.mockDefinitionRepository.getByGroupId(groupId).forEach(this.declareMock)
     }
 
     listActiveMocks(): string[] {

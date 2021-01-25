@@ -9,19 +9,25 @@ test.afterEach((t) => {
     nock.cleanAll()
 })
 
-test.serial('should initialize the mock manager without error', (t) => {
-    const userDefinedOptions: UserDefinedOptions = {
-        baseDirectory: path.join(__dirname, '_data'),
-    }
+const userDefinedOptions: UserDefinedOptions = {
+    baseDirectory: path.join(__dirname, '_data'),
+    services: [
+        {
+            host: 'mock-one.foo.bar',
+            name: 'mockOne',
+        },
+        {
+            host: 'mock-two.foo.bar',
+            name: 'mockTwo',
+        },
+    ],
+}
 
+test.serial('should initialize the mock manager without error', (t) => {
     t.notThrows(() => initialize(userDefinedOptions))
 })
 
 test.serial('should activate expected mock', async (t) => {
-    const userDefinedOptions: UserDefinedOptions = {
-        baseDirectory: path.join(__dirname, '_data'),
-    }
-
     const mockManager = await initialize(userDefinedOptions)
 
     mockManager.activateMock('mock-one')
@@ -31,10 +37,6 @@ test.serial('should activate expected mock', async (t) => {
 })
 
 test.serial('should activate expected group', async (t) => {
-    const userDefinedOptions: UserDefinedOptions = {
-        baseDirectory: path.join(__dirname, '_data'),
-    }
-
     const mockManager = await initialize(userDefinedOptions)
 
     mockManager.activateMocksGroup('group-a')
@@ -45,10 +47,6 @@ test.serial('should activate expected group', async (t) => {
 })
 
 test.serial('should remove all active mocks', async (t) => {
-    const userDefinedOptions: UserDefinedOptions = {
-        baseDirectory: path.join(__dirname, '_data'),
-    }
-
     const mockManager = await initialize(userDefinedOptions)
 
     mockManager.activateMocksGroup('group-a')
