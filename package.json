@@ -2,7 +2,13 @@
   "name": "nock-on-demand",
   "version": "1.0.0",
   "description": "An easy way to manage Nock mocks on a running Node application.",
-  "main": "index.js",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "files": [
+    "build/**",
+    "package.json",
+    "README.md"
+  ],
   "repository": "git@gitlab.ekino.com:fabien.thouraud/nock-on-demand.git",
   "author": "Fabien Thouraud <fabien.thouraud@ekino.com>",
   "license": "MIT",

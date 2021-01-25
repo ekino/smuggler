@@ -1,0 +1,11 @@
+{
+  "name": "express-example",
+  "dependencies": {
+    "express": "^4.17.1",
+    "nock": "^13.0.6",
+    "nock-on-demand": "1.0.0"
+  },
+  "resolutions": {
+    "nock-on-demand": "portal:/Users/fabien.thouraud/Projects/perso/nock-on-demand"
+  }
+}
