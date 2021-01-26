@@ -4,7 +4,7 @@ import { ScopeRepository } from './mock/scopeRepository'
 import { getOptions, Options, UserDefinedOptions } from './option'
 import { isDefined } from './utils/type'
 
-export const loadMockDefinitions = (options: Options): Promise<MockDefinition[]> =>
+const loadMockDefinitions = (options: Options): Promise<MockDefinition[]> =>
     Promise.all(
         listAvailableMocks(options).map((it) =>
             getMockDefinitionLoaders()
@@ -18,6 +18,13 @@ export const loadMockDefinitions = (options: Options): Promise<MockDefinition[]>
             return results
         })
 
+/**
+ * Initialize the {@link MockManager} from the given {@code userOptions}.
+ *
+ * @param {UserDefinedOptions} userOptions - Configuration required to initialize the {@link MockManager}
+ *
+ * @return {MockManager} - The component to use for interacting with your mock declarations
+ */
 export const initialize = async (userOptions: UserDefinedOptions): Promise<MockManager> => {
     const options = getOptions(userOptions)
 
