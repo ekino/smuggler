@@ -2,6 +2,7 @@
   "name": "nock-on-demand",
   "version": "1.0.0",
   "description": "An easy way to manage Nock mocks on a running Node application.",
+  "keywords": ["mock", "nock", "HTTP"],
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "files": [
@@ -43,5 +44,8 @@
     "test:unit:coverage": "nyc --require ts-node/register yarn test:unit",
     "test:int": "ava src/test/integration/**/*.ts",
     "test:int:coverage": "nyc --require ts-node/register yarn test:int"
+  },
+  "engines": {
+    "node": ">= 12"
   }
 }
