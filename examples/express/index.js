@@ -6,7 +6,6 @@ const app = express()
 
 let mockManager
 nockOnDemand.initialize({
-    baseDirectory: __dirname,
     services: [{
         host: 'foo.bar',
         name: 'fooBar'

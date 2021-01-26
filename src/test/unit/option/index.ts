@@ -1,4 +1,5 @@
 import test from 'ava'
+import { stub } from 'sinon'
 
 import { TechnicalError } from '../../../lib/error'
 import { ErrorCode } from '../../../lib/error/definitions'
@@ -22,8 +23,12 @@ test('getOptions should return default values when no options are defined', (t) 
         ],
     }
 
+    const processPath = '/absolute/process/path'
+
+    const cwdStub = stub(process, 'cwd').returns(processPath)
+
     const expectedOptions: Options = {
-        baseDirectory: './',
+        baseDirectory: processPath,
         mocksDirectory: '__mocks__',
         allowedExtensions: ['js'],
         services: [
@@ -38,6 +43,8 @@ test('getOptions should return default values when no options are defined', (t) 
     const options = getOptions(givenUserOptions)
 
     t.deepEqual(options, expectedOptions)
+
+    cwdStub.restore()
 })
 
 test('getOptions should return user defined values', (t) => {
