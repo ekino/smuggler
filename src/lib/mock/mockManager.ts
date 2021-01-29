@@ -22,7 +22,7 @@ export class MockManager {
 
     private declareMock = (definition?: MockDefinition): void => {
         if (definition) {
-            const scope = this.scopeRepository.getByName(definition?.serviceName)
+            const scope = this.scopeRepository.getByName(definition.serviceName)
             if (definition.kind === 'js') {
                 definition.declareMock(scope)
             }

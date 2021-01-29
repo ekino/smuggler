@@ -2,77 +2,43 @@ import avaTest, { TestInterface } from 'ava'
 import { SinonStub, stub } from 'sinon'
 
 import { initialize } from '../../lib'
-import * as mockUtils from '../../lib/mock/listAvailableMocks'
-import * as mockLoader from '../../lib/mock/loader'
+import * as mockLoader from '../../lib/loadMockDefinitions'
 import { UserDefinedOptions } from '../../lib/option'
-import { getMockDefinition, getOptions } from '../_utils/data'
+import { getMockDefinition, getOptions, getService } from '../_utils/data'
 
 type TestContext = {
-    mockDefinitionLoaderStub: mockLoader.MockDefinitionLoader
-    listAvailableMocksStub: SinonStub
-    getMockDefinitionLoadersStub: SinonStub
+    loadMockDefinitionsStub: SinonStub
 }
 
 const test = avaTest as TestInterface<TestContext>
 
 test.before((t) => {
-    t.context.mockDefinitionLoaderStub = {
-        name: 'StubbedMockDefinitionLoader',
-        accept: stub(),
-        load: stub(),
-    }
-
-    t.context.listAvailableMocksStub = stub(mockUtils, 'listAvailableMocks')
-    t.context.getMockDefinitionLoadersStub = stub(mockLoader, 'getMockDefinitionLoaders').returns([
-        t.context.mockDefinitionLoaderStub,
-    ])
-})
-
-const definitionOne = getMockDefinition({ id: 'good' })
-const definitionTwo = getMockDefinition({ id: 'ok' })
-
-test.beforeEach((t) => {
-    const goodMock = 'mock.good'
-    const okMock = 'mock.ok'
-    const badMock = 'mock.bad'
-
-    t.context.listAvailableMocksStub.returns([goodMock, okMock, badMock])
-
-    const acceptStub = t.context.mockDefinitionLoaderStub.accept as SinonStub
-    acceptStub.withArgs(goodMock).returns(true)
-    acceptStub.withArgs(okMock).returns(true)
-    acceptStub.withArgs(badMock).returns(false)
-
-    const loadStub = t.context.mockDefinitionLoaderStub.load as SinonStub
-    loadStub.onFirstCall().returns(definitionOne).onSecondCall().returns(definitionTwo)
+    t.context.loadMockDefinitionsStub = stub(mockLoader, 'loadMockDefinitions')
 })
 
 test.afterEach((t) => {
-    const acceptStub = t.context.mockDefinitionLoaderStub.accept as SinonStub
-    acceptStub.reset()
-
-    const loadStub = t.context.mockDefinitionLoaderStub.load as SinonStub
-    loadStub.reset()
-
-    t.context.listAvailableMocksStub.reset()
+    t.context.loadMockDefinitionsStub.reset()
 })
 
 test.after((t) => {
-    t.context.listAvailableMocksStub.restore()
-    t.context.getMockDefinitionLoadersStub.restore()
+    t.context.loadMockDefinitionsStub.restore()
 })
 
-test('initialize should return a MockManager', async (t) => {
+test('initialize should return a MockManager', async ({ context: { loadMockDefinitionsStub }, ...t }) => {
     const userDefinedOptions: UserDefinedOptions = getOptions({
-        allowedExtensions: ['js'],
+        services: [getService({ name: 'service-a' }), getService({ name: 'service-b' })],
     })
+
+    const mockDefinitions = [getMockDefinition({ id: 'mock-a' }), getMockDefinition({ id: 'mock-b' })]
+    loadMockDefinitionsStub.resolves(mockDefinitions)
 
     const mockManager = await initialize(userDefinedOptions)
 
     t.truthy(mockManager['mockDefinitionRepository'])
-    t.deepEqual(mockManager['mockDefinitionRepository']['mockDefinitions'], [definitionOne, definitionTwo])
+    t.deepEqual(mockManager['mockDefinitionRepository']['mockDefinitions'], mockDefinitions)
 
     const scopesByName = mockManager['scopeRepository']['scopesByName']
     t.truthy(scopesByName)
-    t.true(scopesByName.has('foo'))
+    t.true(scopesByName.has('service-a'))
+    t.true(scopesByName.has('service-b'))
 })
