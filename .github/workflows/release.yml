@@ -1,0 +1,43 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'release-v**'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14.x
+          registry-url: 'https://registry.npmjs.org'
+      - name: Get version
+        id: get-version
+        run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/release-v}
+      - run: |
+          yarn install
+          yarn version ${{ steps.get-version.output.VERSION }}
+          yarn conventional-changelog -p conventionalcommits -i CHANGELOG.md -s
+          git config user.email "smuggler@bots.ekino.com"
+          git config user.name "Smuggler Bot"
+          git add CHANGELOG.md package.json
+          git commit -m "chore(version-bump): ${{ steps.get-version.output.VERSION }}"
+          git push
+          git tag ${{ steps.get-version.output.VERSION }}
+          git push --set-upstream origin ${{ steps.get-version.output.VERSION }}
+      - name: Release version ${{ steps.get-version.output.VERSION }}
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.get-version.output.VERSION }}
+          release_name: V${{ steps.get-version.output.VERSION }}
+      - name: Build & publish to NPM
+        run: |
+          yarn compile
+          yarn npm publish --tag ${{ steps.get-version.output.VERSION }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

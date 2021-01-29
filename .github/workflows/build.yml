@@ -9,50 +9,56 @@ on:
       - main
 
 jobs:
-  cache_dependencies:
+  install_dependencies:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/cache@v2
-        id: yarn-cache-and-node-modules
-        with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-node_modules-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-node_modules
       - uses: actions/setup-node@v2
         with:
           node-version: 14.x
-      - run: yarn install
+      - uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node_modules-${{ hashFiles('**/yarn.lock') }}
+      - name: Install Node modules
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: yarn install
 
   lint:
+    needs: install_dependencies
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
           node-version: 14.x
-      - run: yarn install
+      - uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node_modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn lint
 
   tests:
+    needs: install_dependencies
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         node-version: [ 12.x, 14.x ]
         nock-version: [ 11.x, 12.x, 13.x ]
-
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-      - run: yarn install
-      - run: yarn add nock@${{ matrix.nock-version }}
-      - run: yarn test:unit:coverage
-      - run: yarn test:int
+      - uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node_modules-${{ hashFiles('**/yarn.lock') }}
+      - run: |
+          yarn add nock@${{ matrix.nock-version }}
+          yarn test:unit:coverage
+          yarn test:int
       - name: Node ${{ matrix.node-version }} / Nock ${{ matrix.nock-version }} coverage
         uses: coverallsapp/github-action@master
         with:
@@ -71,11 +77,15 @@ jobs:
           parallel-finished: true
 
   build:
+    needs: install_dependencies
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
           node-version: 14.x
-      - run: yarn install
-      - run: yarn lint
+      - uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node_modules-${{ hashFiles('**/yarn.lock') }}
+      - run: yarn compile
