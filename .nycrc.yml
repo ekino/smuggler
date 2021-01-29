@@ -3,3 +3,6 @@ extension:
   - '.ts'
 include:
   - 'src/lib/**/*.ts'
+reporter:
+  - text
+  - lcov

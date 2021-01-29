@@ -1,6 +1,6 @@
 {
-  "name": "nock-on-demand",
-  "version": "1.0.0",
+  "name": "@ekino/smuggler",
+  "version": "1.0.0-rc0",
   "description": "An easy way to manage Nock mocks on a running Node application.",
   "keywords": ["mock", "nock", "HTTP"],
   "main": "build/index.js",
@@ -10,7 +10,19 @@
     "package.json",
     "README.md"
   ],
-  "repository": "git@gitlab.ekino.com:fabien.thouraud/nock-on-demand.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ekino/smuggler.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ekino/smuggler/issues"
+  },
+  "maintainers": [
+    {
+      "name": "Fabien Thouraud",
+      "url": "https://github.com/fthouraud"
+    }
+  ],
   "author": "Fabien Thouraud <fabien.thouraud@ekino.com>",
   "license": "MIT",
   "dependencies": {
