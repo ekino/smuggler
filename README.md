@@ -2,6 +2,7 @@
 [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/ekino/smuggler/build?style=flat-square)](https://github.com/ekino/smuggler/actions)
 [![Coveralls github branch](https://img.shields.io/coveralls/github/ekino/smuggler/main?style=flat-square)](https://coveralls.io/github/ekino/smuggler?branch=main)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
+[![npm (scoped)](https://img.shields.io/npm/v/@ekino/smuggler?style=flat-square)](https://www.npmjs.com/package/@ekino/smuggler)
 
 This library aims to provide a simple way to handle HTTP mock declarations through [Nock](https://github.com/nock/nock).
 

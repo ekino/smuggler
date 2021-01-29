@@ -35,3 +35,27 @@ test('isDefined should be true when the input is not null nor undefined', isDefi
 test('isDefined should be false when the input is undefined', isDefinedMacro, undefined, false)
 
 test('isDefined should be false when the input is null', isDefinedMacro, null, false)
+
+const hasFunctionMacro: Macro<[Record<string, unknown>, boolean]> = (
+    t,
+    givenInput: Record<string, unknown>,
+    expected: boolean
+) => {
+    t.is(hasFunction(givenInput, 'foo'), expected)
+}
+
+test(
+    'hasFunction should be true when the input has the expected function',
+    hasFunctionMacro,
+    { foo: () => 'test' },
+    true
+)
+
+test(
+    'hasFunction should be false when the input has a property of the same name but which is not a function',
+    hasFunctionMacro,
+    { foo: 'test' },
+    false
+)
+
+test('hasFunction should be false when the input has no property of the same name', hasFunctionMacro, {}, false)

@@ -21,7 +21,7 @@ export const getOptions = (options: UserDefinedOptions): Options => {
 
 export const validateOptions = (options?: UserDefinedOptions): void => {
     if (!options) throw new TechnicalError(ErrorCode.MissingOption, 'Options are required')
-    if (!Array.isArray(options.services) || !(options.services.length > 0))
+    if (!Array.isArray(options.services) || options.services.length <= 0)
         throw new TechnicalError(ErrorCode.MissingOption, 'Options is lacking a services configuration')
     options.services.forEach((it) => {
         if (!it?.host) throw new TechnicalError(ErrorCode.MissingOption, 'A service should at least have a host')
