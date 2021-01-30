@@ -15,12 +15,14 @@ jobs:
           node-version: 14.x
           registry-url: 'https://registry.npmjs.org'
       - name: Get version
-        id: get-version
+        id: get_version
         run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/release-v}
       - run: |
           yarn install
           yarn version $VERSION
           yarn conventional-changelog -p conventionalcommits -i CHANGELOG.md -s
+          yarn compile
+          zip ekino-smuggler-$VERSION.zip build package.json README.md
           git config user.email "smuggler@bots.ekino.com"
           git config user.name "Smuggler Bot"
           git add CHANGELOG.md package.json
@@ -28,40 +30,23 @@ jobs:
           git push
           git tag $VERSION
           git push --set-upstream origin $VERSION
-          zip sources.zip ./*
-          zip ekino-smuggler-$VERSION.zip build package.json README.md
-        env:
-          VERSION: ${{ steps.get-version.output.VERSION }}
-      - name: Build & publish to NPM
-        run: |
-          yarn compile
           yarn npm publish --tag $VERSION
         env:
-          VERSION: ${{ steps.get-version.output.VERSION }}
+          VERSION: ${{ steps.get_version.outputs.VERSION }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: Release version
-        id: release-version
+      - name: Create a release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.get-version.output.VERSION }}
-          release_name: V${{ steps.get-version.output.VERSION }}
-      - name: Upload sources release asset
+          tag_name: ${{ steps.get_version.outputs.VERSION }}
+          release_name: V${{ steps.get_version.outputs.VERSION }}
+      - name: Upload library code
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.release-version.outputs.upload_url }}
-          asset_path: ./sources.zip
-          asset_name: sources.zip
-          asset_content_type: application/zip
-      - name: Upload library release asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.release-version.outputs.upload_url }}
-          asset_path: ./ekino-smuggler-${{ steps.get-version.output.VERSION }}.zip
-          asset_name: ekino-smuggler-${{ steps.get-version.output.VERSION }}.zip
+          asset_path: ./ekino-smuggler-${{ steps.get_version.outputs.VERSION }}.zip
+          asset_name: ekino-smuggler-${{ steps.get_version.outputs.VERSION }}.zip
           asset_content_type: application/zip
