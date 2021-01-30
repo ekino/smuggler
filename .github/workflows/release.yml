@@ -10,34 +10,62 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v2
         with:
           node-version: 14.x
           registry-url: 'https://registry.npmjs.org'
       - name: Get version
-        id: get-version
+        id: get_version
         run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/release-v}
-      - run: |
+      - name: Compile library
+        run: |
+          git checkout -b release/$VERSION
           yarn install
-          yarn version ${{ steps.get-version.output.VERSION }}
+          yarn version $VERSION
           yarn conventional-changelog -p conventionalcommits -i CHANGELOG.md -s
-          git config user.email "smuggler@bots.ekino.com"
-          git config user.name "Smuggler Bot"
+          yarn compile
           git add CHANGELOG.md package.json
-          git commit -m "chore(version-bump): ${{ steps.get-version.output.VERSION }}"
-          git push
-          git tag ${{ steps.get-version.output.VERSION }}
-          git push --set-upstream origin ${{ steps.get-version.output.VERSION }}
-      - name: Release version ${{ steps.get-version.output.VERSION }}
+          git config --global user.email "noreply@github.com"
+          git config --global user.name "Smuggler Bot"
+          git commit -m "chore(release): bump version to ${VERSION}"
+          git push --set-upstream origin release/$VERSION
+        env:
+          VERSION: ${{ steps.get_version.outputs.VERSION }}
+      - name: Create release PR
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: "release/${{ steps.get_version.outputs.VERSION }}"
+          title: "[Release] V${{ steps.get_version.outputs.VERSION }}"
+          body: "Release ${{ steps.get_version.outputs.VERSION }}"
+          labels: release
+          delete-branch: true
+          base: main
+      - name: Create version tag and publish to NPM
+        run: |
+          git tag $VERSION
+          git push --set-upstream origin $VERSION
+          npm publish --tag $VERSION
+        env:
+          VERSION: ${{ steps.get_version.outputs.VERSION }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Create a release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.get-version.output.VERSION }}
-          release_name: V${{ steps.get-version.output.VERSION }}
-      - name: Build & publish to NPM
-        run: |
-          yarn compile
-          yarn npm publish --tag ${{ steps.get-version.output.VERSION }}
+          tag_name: ${{ steps.get_version.outputs.VERSION }}
+          release_name: "V${{ steps.get_version.outputs.VERSION }}"
+      - name: ZIP library
+        run: zip ekino-smuggler-$VERSION.zip build package.json README.md
+      - name: Upload library code
+        uses: actions/upload-release-asset@v1
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.release-version.outputs.upload_url }}
+          asset_path: "./ekino-smuggler-${{ steps.get_version.outputs.VERSION }}.zip"
+          asset_name: "ekino-smuggler-${{ steps.get_version.outputs.VERSION }}.zip"
+          asset_content_type: application/zip
