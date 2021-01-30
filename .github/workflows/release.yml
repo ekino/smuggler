@@ -19,24 +19,27 @@ jobs:
         run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/release-v}
       - run: |
           yarn install
-          yarn version ${{ steps.get-version.output.VERSION }}
+          yarn version $VERSION
           yarn conventional-changelog -p conventionalcommits -i CHANGELOG.md -s
           git config user.email "smuggler@bots.ekino.com"
           git config user.name "Smuggler Bot"
           git add CHANGELOG.md package.json
-          git commit -m "chore(version-bump): ${{ steps.get-version.output.VERSION }}"
+          git commit -m "chore(version-bump): ${VERSION}"
           git push
-          git tag ${{ steps.get-version.output.VERSION }}
-          git push --set-upstream origin ${{ steps.get-version.output.VERSION }}
+          git tag $VERSION
+          git push --set-upstream origin $VERSION
           zip sources.zip ./*
-          zip ekino-smuggler-${{ steps.get-version.output.VERSION }}.zip build package.json README.md
+          zip ekino-smuggler-$VERSION.zip build package.json README.md
+        env:
+          VERSION: ${{ steps.get-version.output.VERSION }}
       - name: Build & publish to NPM
         run: |
           yarn compile
-          yarn npm publish --tag ${{ steps.get-version.output.VERSION }}
+          yarn npm publish --tag $VERSION
         env:
+          VERSION: ${{ steps.get-version.output.VERSION }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: Release version ${{ steps.get-version.output.VERSION }}
+      - name: Release version
         id: release-version
         uses: actions/create-release@v1
         env:
