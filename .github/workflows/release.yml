@@ -28,16 +28,37 @@ jobs:
           git push
           git tag ${{ steps.get-version.output.VERSION }}
           git push --set-upstream origin ${{ steps.get-version.output.VERSION }}
-      - name: Release version ${{ steps.get-version.output.VERSION }}
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.get-version.output.VERSION }}
-          release_name: V${{ steps.get-version.output.VERSION }}
+          zip sources.zip ./*
+          zip ekino-smuggler-${{ steps.get-version.output.VERSION }}.zip build package.json README.md
       - name: Build & publish to NPM
         run: |
           yarn compile
           yarn npm publish --tag ${{ steps.get-version.output.VERSION }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Release version ${{ steps.get-version.output.VERSION }}
+        id: release-version
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.get-version.output.VERSION }}
+          release_name: V${{ steps.get-version.output.VERSION }}
+      - name: Upload sources release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.release-version.outputs.upload_url }}
+          asset_path: ./sources.zip
+          asset_name: sources.zip
+          asset_content_type: application/zip
+      - name: Upload library release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.release-version.outputs.upload_url }}
+          asset_path: ./ekino-smuggler-${{ steps.get-version.output.VERSION }}.zip
+          asset_name: ekino-smuggler-${{ steps.get-version.output.VERSION }}.zip
+          asset_content_type: application/zip
