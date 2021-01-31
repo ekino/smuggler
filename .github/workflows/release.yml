@@ -10,8 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v2
         with:
           node-version: 14.x
@@ -19,37 +17,50 @@ jobs:
       - name: Get version
         id: get_version
         run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/release-v}
-      - run: |
-          git checkout main
+      - name: Compile library
+        run: |
+          git checkout -b release/$VERSION
           yarn install
           yarn version $VERSION
           yarn conventional-changelog -p conventionalcommits -i CHANGELOG.md -s
           yarn compile
-          zip ekino-smuggler-$VERSION.zip build package.json README.md
-          git config user.email "smuggler@bots.ekino.com"
-          git config user.name "Smuggler Bot"
           git add CHANGELOG.md package.json
-          git commit -m "chore(version-bump): ${VERSION}"
-          git push
+          git commit -m "chore(release): bump version to ${VERSION}"
+          git push --set-upstream origin release/$VERSION
+        env:
+          VERSION: ${{ steps.get_version.outputs.VERSION }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Create release PR
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: "release/${{ steps.get_version.outputs.VERSION }}"
+          title: "[Release] V${{ steps.get_version.outputs.VERSION }}"
+          body: "Release ${{ steps.get_version.outputs.VERSION }}"
+          labels: release
+          delete-branch: true
+      - name: Create version tag and publish to NPM
+        run: |
           git tag $VERSION
           git push --set-upstream origin $VERSION
           yarn npm publish --tag $VERSION
         env:
           VERSION: ${{ steps.get_version.outputs.VERSION }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Create a release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.get_version.outputs.VERSION }}
-          release_name: V${{ steps.get_version.outputs.VERSION }}
+          release_name: "V${{ steps.get_version.outputs.VERSION }}"
+      - name: ZIP library
+        run: zip ekino-smuggler-$VERSION.zip build package.json README.md
       - name: Upload library code
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.release-version.outputs.upload_url }}
-          asset_path: ./ekino-smuggler-${{ steps.get_version.outputs.VERSION }}.zip
-          asset_name: ekino-smuggler-${{ steps.get_version.outputs.VERSION }}.zip
+          asset_path: "./ekino-smuggler-${{ steps.get_version.outputs.VERSION }}.zip"
+          asset_name: "ekino-smuggler-${{ steps.get_version.outputs.VERSION }}.zip"
           asset_content_type: application/zip
