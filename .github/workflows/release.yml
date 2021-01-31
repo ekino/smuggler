@@ -43,6 +43,7 @@ jobs:
           body: "Release ${{ steps.get_version.outputs.VERSION }}"
           labels: release
           delete-branch: true
+          base: main
       - name: Create version tag and publish to NPM
         run: |
           git tag $VERSION
