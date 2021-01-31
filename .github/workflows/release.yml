@@ -27,6 +27,8 @@ jobs:
           yarn conventional-changelog -p conventionalcommits -i CHANGELOG.md -s
           yarn compile
           git add CHANGELOG.md package.json
+          git config --global user.email "noreply@github.com"
+          git config --global user.name "Smuggler Bot"
           git commit -m "chore(release): bump version to ${VERSION}"
           git push --set-upstream origin release/$VERSION
         env:
