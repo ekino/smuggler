@@ -1,6 +1,6 @@
 {
   "name": "@ekino/smuggler",
-  "version": "1.0.0-rc0",
+  "version": "1.0.0",
   "description": "An easy way to manage Nock mocks on a running Node application.",
   "keywords": [
     "mock",
