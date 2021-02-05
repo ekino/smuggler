@@ -1,11 +1,11 @@
 const express = require('express')
 const http = require('http')
-const nockOnDemand = require('nock-on-demand')
+const smuggler = require('@ekino/smuggler')
 
 const app = express()
 
 let mockManager
-nockOnDemand.initialize({
+smuggler.initialize({
     services: [{
         host: 'foo.bar',
         name: 'fooBar'

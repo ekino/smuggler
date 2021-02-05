@@ -1,4 +1,4 @@
-# smuggler
+# @ekino/smuggler
 [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/ekino/smuggler/build?style=flat-square)](https://github.com/ekino/smuggler/actions)
 [![Coveralls github branch](https://img.shields.io/coveralls/github/ekino/smuggler/main?style=flat-square)](https://coveralls.io/github/ekino/smuggler?branch=main)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
@@ -33,7 +33,7 @@ module.exports = {
 In order to initialize the `MockManager` (we'll talk about it right after), you just need to call the `initialize` method like so:
 
 ```javascript
-const { initialize } = require('nock-on-demand')
+const { initialize } = require('@ekino/smuggler')
 
 var mockManager = initialize()
 ```
@@ -43,7 +43,7 @@ By default, this function will look for a `__mocks__` directory in the current d
 If you want to modify that, just pass in custom options:
 
 ```javascript
-const { initialize } = require('nock-on-demand')
+const { initialize } = require('@ekino/smuggler')
 
 var mockManager = initialize({
     baseDirectory: '/absolute/path',
