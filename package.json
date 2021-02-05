@@ -30,7 +30,7 @@
   "author": "Fabien Thouraud <fabien.thouraud@ekino.com>",
   "license": "MIT",
   "dependencies": {
-    "nock": ">= 11 <= 13"
+    "nock": ">= 11 <= 13.x"
   },
   "devDependencies": {
     "@commitlint/cli": "^11.0.0",
