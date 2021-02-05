@@ -425,7 +425,7 @@ __metadata:
     eslint-plugin-prettier: ^3.3.1
     eslint-plugin-simple-import-sort: ^7.0.0
     husky: ^4.3.7
-    nock: ">= 11 <= 13"
+    nock: ">= 11 <= 13.x"
     nyc: ^15.1.0
     prettier: ^2.2.1
     sinon: ^9.2.3
@@ -4127,15 +4127,15 @@ fsevents@~2.3.1:
   languageName: node
   linkType: hard
 
-"nock@npm:>= 11 <= 13":
-  version: 13.0.5
-  resolution: "nock@npm:13.0.5"
+"nock@npm:>= 11 <= 13.x":
+  version: 13.0.7
+  resolution: "nock@npm:13.0.7"
   dependencies:
     debug: ^4.1.0
     json-stringify-safe: ^5.0.1
     lodash.set: ^4.3.2
     propagate: ^2.0.0
-  checksum: 2000952241d9f78491bd2770a5186b530eddef8710d219917b078e8c1b329abbdb88bcfb3dfd6bf093e860287ad8da7dd4136fbd2a8c1f42a7b56e3b071807f2
+  checksum: db77afdd757bb9f5496783a9f7cc30eb0664195c469d0b01e2e956545e6c08b24482a4a3fcdf4eef1713da30baa880bde244bac6c546733d5b3a59c6838d24b1
   languageName: node
   linkType: hard
 
